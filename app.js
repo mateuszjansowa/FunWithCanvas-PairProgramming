@@ -1,22 +1,6 @@
-document.addEventListener('DOMContentLoaded', init);
-
-function init() {
-  const canvas = document.querySelector('.canvas');
-  canvas.width = config.width;
-  canvas.height = config.height;
-  const ctx = canvas.getContext('2d');
-
-  canvas.addEventListener('mousemove', (e) => draw(e, ctx));
-  //   canvas.addEventListener('mouseout', stopDrawing);
-  canvas.addEventListener('mousedown', startPosition);
-  canvas.addEventListener('mouseup', stopDrawing);
-}
-
 const config = {
   isDrawing: false,
   hue: `hsl(0,100%,50%)`,
-  lastX: 'offsetX',
-  lastY: 'offsetY',
   lineJoin: 'round',
   lineCap: 'round',
   lineWidth: 10,
@@ -24,19 +8,45 @@ const config = {
   canvasHeight: window.innerHeight,
 };
 
-function draw(e, ctx) {
-  if (!config.isDrawing) return;
+document.addEventListener('DOMContentLoaded', () => init());
 
-  ctx.beginPath(e.config.lastX, e.config.lastY);
-  ctx.stroke();
-  ctx.lineTo(e.config.lastX, e.config.lastY);
-  ctx.lineJoin = config.lineJoin;
-  ctx.lineCap = config.lineCap;
-  ctx.lineWidth = config.lineWidth;
+function init() {
+  const canvas = document.querySelector('.canvas');
+  canvas.width = config.canvasWidth;
+  canvas.height = config.canvasHeight;
+  const ctx = canvas.getContext('2d');
+
+  canvas.addEventListener('mousemove', (e) => draw(e, ctx));
+  //   canvas.addEventListener('mouseout', stopDrawing);
+  canvas.addEventListener('mousedown', (e) => startPosition(e, ctx));
+  canvas.addEventListener('mouseup', stopDrawing);
 }
 
-function startPosition() {
+let lastX = 0;
+let lastY = 0; //rysujemy kropeczki - problem z beginPath i X i Y
+
+function draw(e, ctx) {
+  if (!config.isDrawing) {
+    return;
+  } else {
+    ctx.strokeStyle = 'green';
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    lastX = e.offsetX;
+    lastY = e.offsetY; // tu problem
+    ctx.lineTo(e.offsetX, e.offsetY);
+    ctx.stroke();
+    ctx.lineJoin = config.lineJoin;
+    ctx.lineCap = config.lineCap;
+    ctx.lineWidth = config.lineWidth;
+  }
+}
+
+function startPosition(e, ctx) {
   config.isDrawing = true;
+  // ctx.beginPath();
+  lastX = e.offsetX;
+  lastY = e.offsetY;
 }
 
 function stopDrawing() {
