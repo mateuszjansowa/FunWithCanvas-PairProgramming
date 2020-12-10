@@ -3,10 +3,12 @@ const config = {
   hue: 0,
   lineJoin: 'round',
   lineCap: 'round',
-  lineWidth: 1,
-  canvasWidth: window.innerWidth,
-  canvasHeight: window.innerHeight,
+  lineWidth: 50,
+  canvasWidth: document.body.clientWidth,
+  canvasHeight: document.body.clientHeight - 100,
   direction: true,
+  lastX: 0,
+  lastY: 0,
 };
 
 document.addEventListener('DOMContentLoaded', () => init());
@@ -23,11 +25,8 @@ function init() {
   canvas.addEventListener('mouseout', stopDrawing);
   canvas.addEventListener('mousedown', (e) => startPosition(e));
   canvas.addEventListener('mouseup', stopDrawing);
-  btn.addEventListener('click', (ctx, canvas) => clearCanvas(ctx, canvas));
+  btn.addEventListener('click', () => clearCanvas(ctx, canvas));
 }
-
-let lastX = 0;
-let lastY = 0; //rysujemy kropeczki - problem z beginPath i X i Y
 
 function draw(e, ctx) {
   if (!config.isDrawing) {
@@ -35,9 +34,9 @@ function draw(e, ctx) {
   } else {
     ctx.strokeStyle = `hsl(${config.hue}, 100%, 50%)`;
     ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-    lastX = e.offsetX;
-    lastY = e.offsetY;
+    ctx.moveTo(config.lastX, config.lastY);
+    config.lastX = e.offsetX;
+    config.lastY = e.offsetY;
     ctx.lineTo(e.offsetX, e.offsetY);
     ctx.stroke();
     ctx.lineJoin = config.lineJoin;
@@ -47,10 +46,9 @@ function draw(e, ctx) {
     if (config.hue === 360) {
       config.hue = 0;
     }
-    if (config.lineWidth === 50) {
-      config.direction = false;
-    } else if (config.lineWidth === 1) {
-      config.direction = true;
+
+    if (config.lineWidth >= 50 || config.lineWidth <= 1) {
+      config.direction = !config.direction;
     }
 
     if (config.direction) {
@@ -63,8 +61,8 @@ function draw(e, ctx) {
 
 function startPosition(e) {
   config.isDrawing = true;
-  lastX = e.offsetX;
-  lastY = e.offsetY;
+  config.lastX = e.offsetX;
+  config.lastY = e.offsetY;
 }
 
 function stopDrawing() {
